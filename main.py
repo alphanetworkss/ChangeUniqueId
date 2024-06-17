@@ -1,24 +1,27 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import annotations
-from abc import ABC, abstractmethod
-
+import os
+import asyncio
+import argparse
 import pytz
 import datetime
-import os, argparse
-import asyncio, shlex
+import shlex
 from os.path import join
 from aiofiles.os import remove
 from aiohttp import ClientSession
 from typing import Union, List
 from logging import getLogger, FileHandler, StreamHandler, INFO, basicConfig
-from telegram import Bot
+from telegram import Bot, Update
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 __version__ = "1.0"
 __author__ = "https://t.me/hiddenextractorbot"
 __license__ = "MIT"
 __copyright__ = "Copyright 2024"
 
+# Telegram bot token and channel ID (replace with your actual token and ID)
+BOT_TOKEN = "YOUR_BOT_TOKEN"
+CHANNEL_ID = "@your_channel_id"
+
+# Configure logging
 basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[FileHandler('logs.txt', encoding='utf-8'),
@@ -26,7 +29,6 @@ basicConfig(
     level=INFO)
 
 LOGGER = getLogger("drm")
-
 os.makedirs("Videos/", exist_ok=True)
 
 def print_ascii_art():
@@ -40,7 +42,7 @@ def print_ascii_art():
     """'\033[0m''\033[33m'f'v{__version__} by {__author__}, {__license__} @{__copyright__}\n''\033[0m'
     print(text)
 
-class SERVICE(ABC):
+class SERVICE:
 
     def __init__(self):
         self._remoteapi = "https://app.magmail.eu.org/get_keys"
@@ -58,15 +60,13 @@ class SERVICE(ABC):
 
     async def get_keys(self):
         async with ClientSession(headers={"user-agent": "okhttp"}) as session:
-            async with session.post(self._remoteapi,
-                                    json={"link": self.mpd_link}) as resp:
+            async with session.post(self._remoteapi, json={"link": self.mpd_link}) as resp:
                 if resp.status != 200:
                     LOGGER.error(f"Invalid request: {await resp.text()}")
                     return None
                 response = await resp.json(content_type=None)
         self.mpd_link = response["MPD"]
         return response["KEY_STRING"]
-
 
 class Download(SERVICE):
 
@@ -94,8 +94,7 @@ class Download(SERVICE):
         LOGGER.info(f"MPD: {self.mpd_link}")
         LOGGER.info(f"Got the Keys > {key}")
         LOGGER.info(f"Downloading Started...")
-        if await self.__yt_dlp_drm() and await self.__decrypt(
-                key) and await self.__merge():
+        if await self.__yt_dlp_drm() and await self.__decrypt(key) and await self.__merge():
             LOGGER.info(f"Cleaning up files for: {self.name}")
             await self.__cleanup_files()
             LOGGER.info(f"Downloading complete for: {self.name}")
@@ -144,8 +143,8 @@ class Download(SERVICE):
 
     async def __cleanup_files(self):
         for file_path in [
-                self.encrypted_video, self.encrypted_audio,
-                self.decrypted_audio, self.decrypted_video
+            self.encrypted_video, self.encrypted_audio,
+            self.decrypted_audio, self.decrypted_video
         ]:
             try:
                 await remove(file_path)
@@ -153,39 +152,40 @@ class Download(SERVICE):
                 LOGGER.warning(f"Failed to delete {file_path}: {str(e)}")
 
 
-async def main(file_path: str, tg_bot_token: str, tg_channel_id: str, resl: str):
-    with open(file_path, 'r') as file:
-        mpd_links = [line.strip() for line in file.readlines()]
+async def handle_message(update: Update, context: CallbackContext):
+    if update.message.document:
+        document = update.message.document
+        file_name = document.file_name
+        file_id = document.file_id
+        file = context.bot.get_file(file_id)
+        file.download(file_name)
+        await process_video_file(file_name)
 
-    bot = Bot(token=tg_bot_token)
 
-    for index, mpd in enumerate(mpd_links):
-        name = f"video_{index + 1}"
-        downloader = Download(name, resl, mpd)
+async def process_video_file(file_name: str):
+    with open(file_name, 'r') as file:
+        mpd_links = [line.strip().split(',', 1) for line in file.readlines()]
+
+    bot = Bot(token=BOT_TOKEN)
+
+    for name, mpd in mpd_links:
+        downloader = Download(name, "1", mpd)  # Assuming resolution as "1" (highest)
         merged_file = await downloader.process_video()
         if merged_file:
-            await bot.send_document(chat_id=tg_channel_id, document=open(merged_file, 'rb'))
+            await bot.send_document(chat_id=CHANNEL_ID, document=open(merged_file, 'rb'))
             LOGGER.info(f"Uploaded {merged_file} to Telegram channel.")
+
+
+def main():
+    updater = Updater(token=BOT_TOKEN, use_context=True)
+    dispatcher = updater.dispatcher
+
+    dispatcher.add_handler(MessageHandler(Filters.document, handle_message))
+
+    updater.start_polling()
+    updater.idle()
 
 
 if __name__ == "__main__":
     print_ascii_art()
-    parser = argparse.ArgumentParser(
-        description='Download and Decrypt DRM Video via Remote Key API and upload to Telegram channel')
-    parser.add_argument('-f',
-                        '--file',
-                        type=str,
-                        help='Path to the text file containing MPD links',
-                        required=True)
-    parser.add_argument('-r',
-                        '--resl',
-                        type=str,
-                        help='Video Resolution (1/2/3) where 1 is highest and 3 is lowest available resolution',
-                        default="1")
-    parser.add_argument('-t',
-                        '--token',
-                        type=str,
-                        help='Telegram Bot Token',
-                        required=True)
-    parser.add_argument('-c',
-                        '--channel
+    main()
