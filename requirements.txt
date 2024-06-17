@@ -1,2 +1,4 @@
-gspread
-oauth2client
+aiofiles==0.7.0
+aiohttp==3.8.1
+pytz==2023.10
+python-telegram-bot==19.13.0
