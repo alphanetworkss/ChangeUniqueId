@@ -89,8 +89,12 @@ async def bulk(event):
             f"3. Send File to Telegram Bot:\n"
             f"- Click on the \"Send to Telegram bot\" button to submit your details and start the Script Making process.",
             buttons=[
-                Button.url("For Pc", "https://t.me/Alpha_Script_Robot/AlphaNetwork"),
-                Button.url("For Phone", "https://t.me/Alpha_Script_Robot/mobile"),
+                Button.url("For Pc", "https://t.me/Alpha_Script_Robot/AlphaNetwork")   
+            ]
+            buttons=[
+                Button.url("For Phone", "https://t.me/Alpha_Script_Robot/mobile")
+            ]
+            buttons=[
                 Button.inline("Get Secret ID", b"get_chat_id")
             ]
         )
