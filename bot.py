@@ -75,22 +75,22 @@ async def callback_check_subscription(event):
 async def bulk(event):
     if await check_subscription(event):
         await event.respond(
-            "*Follow Steps To Generate Script*\n"
-            "1. Generate Your Secret ID:\n"
-            "- Click on the \"Get Secret ID\" button.\n"
-            "- The bot will send you a message with your secret ID in monospace format.\n"
-            "- Copy this ID for later use.\n\n"
+            f"*Follow Steps To Generate Script*\n"
+            f"1. Generate Your Secret ID:\n"
+            f"- Click on the \"Get Secret ID\" button.\n"
+            f"- The bot will send you a message with your secret ID in monospace format.\n"
+            f"- Copy this ID for later use.\n\n"
             # "2. Start Script Maker Panel:\n"
             # "- Click on the \"Get script\" button to initiate the link maker panel.\n\n"
-            "2. Enter Your Details:\n"
-            "- Paste your JSON data: Enter the JSON data required for the script.\n"
-            "- Select Quality: Choose the desired quality setting for your script.\n"
-            "- Paste your Secret ID: Enter the secret ID you obtained from the Alpha bot.\n"
-            "4. Send File to Telegram Bot:\n"
-            "- Click on the \"Send to Telegram bot\" button to submit your details and start the Script Making process.",
+            f"2. Enter Your Details:\n"
+            f"- Paste your JSON data: Enter the JSON data required for the script.\n"
+            f"- Select Quality: Choose the desired quality setting for your script.\n"
+            f"- Paste your Secret ID: Enter the secret ID you obtained from the Alpha bot.\n"
+            f"3. Send File to Telegram Bot:\n"
+            f"- Click on the \"Send to Telegram bot\" button to submit your details and start the Script Making process.",
             buttons=[
                 Button.url("For Pc", "https://t.me/Alpha_Script_Robot/AlphaNetwork"),
-                Button.url("For Mobile", "https://t.me/Alpha_Script_Robot/mobile"),
+                Button.url("For Phone", "https://t.me/Alpha_Script_Robot/mobile"),
                 Button.inline("Get Secret ID", b"get_chat_id")
             ]
         )
