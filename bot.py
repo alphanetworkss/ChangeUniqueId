@@ -101,7 +101,7 @@ async def get_chat_id_callback(event):
         chat_id = event.chat_id
         await event.respond(f"Your Secret ID is: `{chat_id}`")
 
-@bot.on(events.NewMessage(pattern='/get_secret_id'))
+@bot.on(events.NewMessage(pattern='/secretid'))
 async def get_chat_id_command(event):
     if await check_subscription(event):
         chat_id = event.chat_id
