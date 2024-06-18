@@ -50,40 +50,47 @@ async def callback_check_subscription(event):
     if await check_subscription(event):
         await event.respond("You have successfully subscribed! You can now use the bot.")
 
+# @bot.on(events.NewMessage(pattern='/start'))
+# async def start(event):
+#     await event.respond(
+#             "*Follow Steps To Generate Link In Bulk*\n"
+#             "1. Generate Your Secret ID:\n"
+#             "- Click on the \"Get Secret ID\" button.\n"
+#             "- The bot will send you a message with your secret ID in monospace format.\n"
+#             "- Copy this ID for later use.\n\n"
+#             "2. Start Bulk Link Maker Panel:\n"
+#             "- Click on the \"Get script\" button to initiate the link maker panel.\n\n"
+#             "3. Enter Your Details:\n"
+#             "- Paste your JSON data: Enter the JSON data required for the script.\n"
+#             "- Select Quality: Choose the desired quality setting for your script.\n"
+#             "- Paste your Secret ID: Enter the secret ID you obtained from the Alpha bot.\n"
+#             "4. Send File to Telegram Bot:\n"
+#             "- Click on the \"Send to Telegram bot\" button to submit your details and start the link changing process.",
+#             buttons=[
+#                 Button.inline("Get Secret ID", b"get_chat_id")
+#             ]
+#         )
+
 @bot.on(events.NewMessage(pattern='/start'))
-async def start(event):
-    await event.respond("Hi, I am the link changer of Physics Wallah")
-
-@bot.on(events.NewMessage(pattern='https://'))
-async def change(event):
-    if await check_subscription(event):
-        try:
-            link_hash = event.raw_text.split('/')[3]
-            await link_gen(link_hash, bot, event)
-        except IndexError:
-            await event.respond("Invalid URL! Please ensure it is in the correct format.")
-        except Exception as e:
-            await event.respond(f"An error occurred: {str(e)}")
-
-@bot.on(events.NewMessage(pattern='/bulk'))
 async def bulk(event):
     if await check_subscription(event):
         await event.respond(
-            "*Follow Steps To Generate Link In Bulk*\n"
+            "*Follow Steps To Generate Script*\n"
             "1. Generate Your Secret ID:\n"
             "- Click on the \"Get Secret ID\" button.\n"
             "- The bot will send you a message with your secret ID in monospace format.\n"
             "- Copy this ID for later use.\n\n"
-            "2. Start Bulk Link Maker Panel:\n"
-            "- Click on the \"Get script\" button to initiate the link maker panel.\n\n"
-            "3. Enter Your Details:\n"
+            # "2. Start Script Maker Panel:\n"
+            # "- Click on the \"Get script\" button to initiate the link maker panel.\n\n"
+            "2. Enter Your Details:\n"
             "- Paste your JSON data: Enter the JSON data required for the script.\n"
             "- Select Quality: Choose the desired quality setting for your script.\n"
             "- Paste your Secret ID: Enter the secret ID you obtained from the Alpha bot.\n"
             "4. Send File to Telegram Bot:\n"
-            "- Click on the \"Send to Telegram bot\" button to submit your details and start the link changing process.",
+            "- Click on the \"Send to Telegram bot\" button to submit your details and start the Script Making process.",
             buttons=[
-                Button.url("Get Link In Bulk", "https://t.me/PW_Alpha_Link_Changer_RoBot/linkchanger"),
+                Button.url("For Pc", "https://t.me/Alpha_Script_Robot/AlphaNetwork"),
+                Button.url("For Mobile", "https://t.me/Alpha_Script_Robot/mobile"),
                 Button.inline("Get Secret ID", b"get_chat_id")
             ]
         )
